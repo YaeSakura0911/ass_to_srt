@@ -1,6 +1,7 @@
 import json
 import os.path
 import re
+import time
 
 
 def get_start(item: list) -> str:
@@ -98,17 +99,35 @@ def write_srt_file(filepath: str, subs: list):
 
 
 if __name__ == '__main__':
+    start_time = time.time()
+    FIRST_RUNNING_FLAG = False  # 首次运行标志位
     # 判断有无input目录
     if not os.path.isdir('./input'):
-        os.makedirs('input')
+        FIRST_RUNNING_FLAG = True
+        os.makedirs('input')  # 创建 input 目录
     # 判断有无output目录
     if not os.path.isdir('./output'):
-        os.makedirs('output')
+        FIRST_RUNNING_FLAG = True
+        os.makedirs('output')  # 创建 output 目录
+    # 判断有无配置文件
+    if not os.path.isfile('./config.json'):
+        FIRST_RUNNING_FLAG = True
+        config_file = open(file='./config.json', mode='w', encoding='utf-8')  # 创建配置文件
+        config = json.dumps({"filter_text": []})
+        config_file.write(config)  # 写入配置文件
+        config_file.close()  # 关闭配置文件
+    if FIRST_RUNNING_FLAG:
+        exit(0)
     # 读取配置文件
-    config = json.load(open(file='./config.json', mode='r', encoding='utf-8'))
+    config_file = open(file='./config.json', mode='r', encoding='utf-8')  # 打开配置文件
+    config = json.load(config_file)  # 读取配置文件
     FILTER_TEXT = config['filter_text']  # 过滤字符集
+    config_file.close()  # 关闭配置文件
     # 读取input目录下所有ass文件
     ass_list = load_ass_file()
+    print(f'共计{len(ass_list)}个文件')
     # 处理字幕
     for ass in ass_list:
         subtitle_handler(ass)
+    end_time = time.time()
+    print(f'共耗时{end_time - start_time}秒')

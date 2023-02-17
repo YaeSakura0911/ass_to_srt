@@ -1,3 +1,6 @@
+build/
+dist/
 .idea/
 input/
 output/
+main.spec
